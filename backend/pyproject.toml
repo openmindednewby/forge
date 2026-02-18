@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "forge"
+version = "0.1.0"
+description = "Local image generation platform"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.34",
+    "pydantic>=2.10",
+    "pydantic-settings>=2.7",
+    "sqlalchemy[asyncio]>=2.0",
+    "aiosqlite>=0.20",
+    "alembic>=1.14",
+    "pillow>=11.0",
+    "httpx>=0.28",
+    "huggingface-hub>=0.27",
+    "pyyaml>=6.0",
+    "websockets>=14.0",
+]
+
+[project.optional-dependencies]
+diffusers = [
+    "torch>=2.5",
+    "diffusers>=0.32",
+    "transformers>=4.47",
+    "accelerate>=1.2",
+    "safetensors>=0.4",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=6.0",
+    "httpx",
+    "ruff>=0.8",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM"]

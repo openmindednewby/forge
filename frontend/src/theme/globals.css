@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@theme {
+  --color-forge-50: #fff7ed;
+  --color-forge-100: #ffedd5;
+  --color-forge-200: #fed7aa;
+  --color-forge-300: #fdba74;
+  --color-forge-400: #fb923c;
+  --color-forge-500: #f97316;
+  --color-forge-600: #ea580c;
+  --color-forge-700: #c2410c;
+  --color-forge-800: #9a3412;
+  --color-forge-900: #7c2d12;
+
+  --color-surface-0: #0a0a0a;
+  --color-surface-1: #141414;
+  --color-surface-2: #1e1e1e;
+  --color-surface-3: #282828;
+  --color-surface-4: #323232;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-4);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neutral-600);
+}
+
+/* Focus ring */
+*:focus-visible {
+  outline: 2px solid var(--color-forge-500);
+  outline-offset: 2px;
+}

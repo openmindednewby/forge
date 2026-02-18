@@ -1,0 +1,45 @@
+# Forge Configuration
+# Copy to forge.yaml and edit to match your setup
+
+server:
+  host: "0.0.0.0"
+  port: 7860
+
+paths:
+  # Base directory for all forge data (models, outputs, database)
+  # Default: ~/.forge
+  base_dir: null
+
+  # Override individual paths (relative to base_dir if not absolute)
+  models_dir: null    # Default: {base_dir}/models
+  outputs_dir: null   # Default: {base_dir}/outputs
+  db_path: null       # Default: {base_dir}/forge.db
+
+gpu:
+  # Device to use: "cuda", "cpu", or "cuda:0", "cuda:1" etc.
+  device: "cuda"
+  # Use float16 for lower VRAM usage (recommended for <16GB)
+  half_precision: true
+  # Offload model layers to CPU when VRAM is tight
+  cpu_offload: false
+  # Enable attention slicing for lower VRAM (slower)
+  attention_slicing: false
+  # Enable VAE tiling for high-res generation
+  vae_tiling: true
+
+generation:
+  # Default values for generation parameters
+  default_steps: 30
+  default_cfg_scale: 7.0
+  default_width: 512
+  default_height: 512
+  default_sampler: "euler_a"
+  max_width: 2048
+  max_height: 2048
+  max_batch_size: 4
+
+backend:
+  # Which backend to use: "diffusers", "comfyui", "onnx"
+  active: "diffusers"
+  comfyui:
+    url: "http://localhost:8188"
