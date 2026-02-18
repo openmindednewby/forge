@@ -1,3 +1,5 @@
+import { isValueDefined } from "../utils/typeGuards";
+
 type EventHandler = (event: WebSocketEvent) => void;
 
 export interface ProgressEvent {
@@ -40,12 +42,35 @@ export type WebSocketEvent =
   | JobCompletedEvent
   | JobFailedEvent;
 
+const EVENT_TYPES = new Set([
+  "job:progress",
+  "job:started",
+  "job:completed",
+  "job:failed",
+]);
+
+const hasStringType = (
+  data: object,
+): data is { type: string } =>
+  "type" in data && typeof data.type === "string";
+
+const isWebSocketEvent = (data: unknown): data is WebSocketEvent => {
+  if (typeof data !== "object" || !isValueDefined(data)) return false;
+  return hasStringType(data) && EVENT_TYPES.has(data.type);
+};
+
+const parseEvent = (raw: string): WebSocketEvent | null => {
+  const parsed: unknown = JSON.parse(raw);
+  if (isWebSocketEvent(parsed)) return parsed;
+  return null;
+};
+
 const RECONNECT_DELAY_MS = 2000;
 const MAX_RECONNECT_DELAY_MS = 30_000;
 
 class WebSocketManager {
   private ws: WebSocket | null = null;
-  private handlers: Set<EventHandler> = new Set();
+  private handlers = new Set<EventHandler>();
   private reconnectDelay = RECONNECT_DELAY_MS;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private intentionallyClosed = false;
@@ -67,19 +92,19 @@ class WebSocketManager {
       this.reconnectDelay = RECONNECT_DELAY_MS;
     };
 
-    this.ws.onmessage = (event) => {
+    this.ws.onmessage = (event: MessageEvent<string>) => {
       try {
-        const data = JSON.parse(event.data) as WebSocketEvent;
-        this.handlers.forEach((handler) => handler(data));
+        const data = parseEvent(event.data);
+        if (isValueDefined(data))
+          this.handlers.forEach((handler) => handler(data));
       } catch {
         // Ignore malformed messages
       }
     };
 
     this.ws.onclose = () => {
-      if (!this.intentionallyClosed) {
+      if (!this.intentionallyClosed)
         this.scheduleReconnect();
-      }
     };
 
     this.ws.onerror = () => {
@@ -89,7 +114,7 @@ class WebSocketManager {
 
   disconnect(): void {
     this.intentionallyClosed = true;
-    if (this.reconnectTimer) {
+    if (isValueDefined(this.reconnectTimer)) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
     }
@@ -103,7 +128,7 @@ class WebSocketManager {
   }
 
   private scheduleReconnect(): void {
-    if (this.reconnectTimer) return;
+    if (isValueDefined(this.reconnectTimer)) return;
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
       this.reconnectDelay = Math.min(

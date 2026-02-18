@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-interface GenerationParams {
+export interface GenerationParams {
   prompt: string;
   negativePrompt: string;
   modelId: string;

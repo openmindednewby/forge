@@ -1,8 +1,27 @@
-import { useQuery } from "@tanstack/react-query";
-import { Cpu, Info } from "lucide-react";
-import { getSystemInfo } from "../api/client";
+import type { JSX } from "react";
 
-export function SettingsPage() {
+import { Cpu, Info } from "lucide-react";
+
+import { useQuery } from "@tanstack/react-query";
+
+import { getSystemInfo } from "../api/client";
+import { isValueDefined } from "../utils/typeGuards";
+
+
+const InfoRow = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}): JSX.Element => (
+  <div>
+    <span className="text-neutral-500">{label}</span>
+    <p className="text-neutral-200">{value}</p>
+  </div>
+);
+
+export const SettingsPage = (): JSX.Element => {
   const { data: sysInfo } = useQuery({
     queryKey: ["system-info"],
     queryFn: getSystemInfo,
@@ -24,7 +43,7 @@ export function SettingsPage() {
               System Information
             </h2>
 
-            {sysInfo ? (
+            {isValueDefined(sysInfo) ? (
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <InfoRow label="Version" value={`Forge v${sysInfo.version}`} />
                 <InfoRow label="Backend" value={sysInfo.backend} />
@@ -34,22 +53,22 @@ export function SettingsPage() {
                   <>
                     <InfoRow
                       label="VRAM Total"
-                      value={`${sysInfo.gpu.vram_total_mb} MB`}
+                      value={`${String(sysInfo.gpu.vram_total_mb)} MB`}
                     />
                     <InfoRow
                       label="VRAM Used"
-                      value={`${sysInfo.gpu.vram_used_mb} MB`}
+                      value={`${String(sysInfo.gpu.vram_used_mb)} MB`}
                     />
                     <InfoRow
                       label="VRAM Free"
-                      value={`${sysInfo.gpu.vram_free_mb} MB`}
+                      value={`${String(sysInfo.gpu.vram_free_mb)} MB`}
                     />
                     <InfoRow label="CUDA" value={sysInfo.gpu.cuda_version} />
                   </>
                 )}
                 <InfoRow
                   label="Queue"
-                  value={`${sysInfo.queue_length} jobs`}
+                  value={`${String(sysInfo.queue_length)} jobs`}
                 />
                 <InfoRow
                   label="Models Loaded"
@@ -87,13 +106,4 @@ export function SettingsPage() {
       </div>
     </div>
   );
-}
-
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <span className="text-neutral-500">{label}</span>
-      <p className="text-neutral-200">{value}</p>
-    </div>
-  );
-}
+};

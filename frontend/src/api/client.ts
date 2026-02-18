@@ -1,5 +1,9 @@
 import axios from "axios";
 
+import { isValueDefined } from "../utils/typeGuards";
+
+import type { AxiosResponse } from "axios";
+
 export const api = axios.create({
   baseURL: "/api",
   timeout: 30_000,
@@ -100,40 +104,63 @@ export interface SystemInfo {
   python_version: string;
 }
 
+const extractData = <T>(r: AxiosResponse<T>): T => r.data;
+
 // API functions
-export const generateImage = (params: GenerateRequest) =>
-  api.post<JobResponse>("/generate", params).then((r) => r.data);
+export const generateImage = async (
+  params: GenerateRequest,
+): Promise<JobResponse> =>
+  api.post<JobResponse>("/generate", params).then(extractData);
 
-export const getJob = (jobId: string) =>
-  api.get<JobResponse>(`/jobs/${jobId}`).then((r) => r.data);
+export const getJob = async (jobId: string): Promise<JobResponse> =>
+  api.get<JobResponse>(`/jobs/${jobId}`).then(extractData);
 
-export const cancelJob = (jobId: string) =>
-  api.post(`/jobs/${jobId}/cancel`).then((r) => r.data);
+export const cancelJob = async (jobId: string): Promise<JobResponse> =>
+  api.post<JobResponse>(`/jobs/${jobId}/cancel`).then(extractData);
 
-export const getModels = (type?: string) =>
+export const getModels = async (
+  type?: string,
+): Promise<ModelListResponse> =>
   api
-    .get<ModelListResponse>("/models", { params: type ? { type } : {} })
-    .then((r) => r.data);
+    .get<ModelListResponse>("/models", {
+      params: isValueDefined(type) && type !== "" ? { type } : {},
+    })
+    .then(extractData);
 
-export const loadModel = (modelId: string) =>
-  api.post(`/models/${encodeURIComponent(modelId)}/load`).then((r) => r.data);
+export const loadModel = async (
+  modelId: string,
+): Promise<JobResponse> =>
+  api
+    .post<JobResponse>(`/models/${encodeURIComponent(modelId)}/load`)
+    .then(extractData);
 
-export const unloadModel = () =>
-  api.post("/models/unload").then((r) => r.data);
+export const unloadModel = async (): Promise<JobResponse> =>
+  api.post<JobResponse>("/models/unload").then(extractData);
 
-export const getGallery = (page = 1, pageSize = 50, favoritesOnly = false) =>
+const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE_SIZE = 50;
+
+export const getGallery = async (
+  page = DEFAULT_PAGE,
+  pageSize = DEFAULT_PAGE_SIZE,
+  favoritesOnly = false,
+): Promise<GalleryResponse> =>
   api
     .get<GalleryResponse>("/gallery", {
       params: { page, page_size: pageSize, favorites_only: favoritesOnly },
     })
-    .then((r) => r.data);
+    .then(extractData);
 
-export const toggleFavorite = (imageId: string) =>
-  api.patch(`/gallery/${imageId}/favorite`).then((r) => r.data);
+export const toggleFavorite = async (
+  imageId: string,
+): Promise<GalleryImage> =>
+  api.patch<GalleryImage>(`/gallery/${imageId}/favorite`).then(extractData);
 
-export const getSystemInfo = () =>
-  api.get<SystemInfo>("/system/info").then((r) => r.data);
+export const getSystemInfo = async (): Promise<SystemInfo> =>
+  api.get<SystemInfo>("/system/info").then(extractData);
 
-export const getImageUrl = (imageId: string) => `/api/gallery/${imageId}/image`;
-export const getThumbnailUrl = (imageId: string) =>
+export const getImageUrl = (imageId: string): string =>
+  `/api/gallery/${imageId}/image`;
+
+export const getThumbnailUrl = (imageId: string): string =>
   `/api/gallery/${imageId}/thumbnail`;
